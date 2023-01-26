@@ -1,3 +1,3 @@
 # gigaton
 
-<img src="gigaton.png" />
+![Screenshot](gigaton.png)
