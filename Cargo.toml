@@ -8,5 +8,7 @@ edition = "2021"
 [dependencies]
 dirs = "4.0.0"
 notify = "5.1.0"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_yaml = "0.9.17"
 walkdir = "2.3.2"
 zip = "0.6.3"
