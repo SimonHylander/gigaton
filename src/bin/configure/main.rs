@@ -35,13 +35,29 @@ fn load_config() -> std::io::Result<Config> {
     }
 
     let config_file = &Path::new(path).join("gigaton.yaml");
+    println!("{:?}", config_file.exists());
 
     if !config_file.exists() {
+        println!("Creating config file:");
         File::create(config_file)?;
+
+        let c = Config {
+            targets: Mapping::new(),
+        };
+
+        let f = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(config_file)
+            .expect("Couldn't open file");
+
+        serde_yaml::to_writer(f, &c).unwrap();
+
+        return Ok(c);
     }
 
     let f = std::fs::File::open(config_file).unwrap();
     let scrape_config: Config = serde_yaml::from_reader(f).expect("Could not read config");
 
-    Ok(scrape_config)
+    return Ok(scrape_config);
 }
