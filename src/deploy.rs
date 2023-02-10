@@ -1,3 +1,5 @@
+use std::{env, path::Path};
+
 pub fn setup_ssh(user: &str, server: &str, remote_path: &str, local_path: &str) {
     /* base_ssh = f'{os.environ["HOME"]}/.ssh'
     os.makedirs(base_ssh, exist_ok=True)
@@ -39,34 +41,14 @@ pub fn setup_ssh(user: &str, server: &str, remote_path: &str, local_path: &str) 
     self.log_info('Applied file permissions to ssh directory.') */
 }
 
-pub fn deploy() {
+pub fn deploy(target: &str) {
     println!("Deploying...");
+    println!("{}", target);
 
-    /* def run(self):
-    self.setup_ssh_config()
-    server = self.get_variable('SERVER')
-    user = self.get_variable('USER')
-    remote_path = self.get_variable('REMOTE_PATH')
-    local_path = self.get_variable('LOCAL_PATH')
-    debug = self.get_variable('DEBUG')
+    let cwd = env::current_dir().unwrap();
 
-    scp_debug_args = '-v' if debug else ''
-
-    base_command = ['scp', '-rp']
-    if scp_debug_args:
-        base_command.append('-v')
-
-    local_path = self.convert_local_path(local_path)
-    if local_path and not os.path.exists(local_path[0]):
-        self.fail(f'Deployment failed. Path {local_path} does not exist.')
-
-    final_command = (base_command + list(self.get_variable('EXTRA_ARGS')) +
-                     local_path + [f'{user}@{server}:{remote_path}'])
-
-    result = subprocess.run(final_command)
-
-    if result.returncode != 0:
-        self.fail(message='Deployment failed.')
-
-    self.success(message=f"Deployment finished.") */
+    if (target == ".") {
+        println!("{}", cwd.display());
+        // let path = Path::join(env::current_dir().unwrap().as_path());
+    }
 }
