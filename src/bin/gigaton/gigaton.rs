@@ -8,17 +8,18 @@ use std::fs::File;
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
 
-pub fn zip_directory(src_dir: &str, dst_file: &str) {
+pub fn zip_directory(src_dir: &str, dst_file: &Path) {
+    println!("Compressing {} -> {}", src_dir, dst_file.display());
+
     for &method in [METHOD_STORED, METHOD_DEFLATED, METHOD_BZIP2, METHOD_ZSTD].iter() {
         if method.is_none() {
             continue;
         }
-        match doit(&src_dir, &dst_file, method.unwrap()) {
-            Ok(_) => println!("done: {} written to {}", src_dir, dst_file),
+        match do_zip(&src_dir, &dst_file, method.unwrap()) {
+            Ok(_) => println!("Archived: {}", dst_file.display()),
             Err(e) => println!("Error: {:?}", e),
         }
     }
-    // std::process::exit(i);
 }
 
 const METHOD_STORED: Option<zip::CompressionMethod> = Some(zip::CompressionMethod::Stored);
@@ -56,11 +57,13 @@ where
     T: Write + Seek,
 {
     let mut zip = zip::ZipWriter::new(writer);
+
     let options = FileOptions::default()
         .compression_method(method)
         .unix_permissions(0o755);
 
     let mut buffer = Vec::new();
+
     for entry in it {
         let path = entry.path();
         let name = path.strip_prefix(Path::new(prefix)).unwrap();
@@ -84,21 +87,22 @@ where
             zip.add_directory_from_path(name, options)?;
         }
     }
+
     zip.finish()?;
+
     Result::Ok(())
 }
 
-fn doit(
+fn do_zip(
     src_dir: &str,
-    dst_file: &str,
+    dst_file: &Path,
     method: zip::CompressionMethod,
 ) -> zip::result::ZipResult<()> {
     if !Path::new(src_dir).is_dir() {
         return Err(ZipError::FileNotFound);
     }
 
-    let path = Path::new(dst_file);
-    let file = File::create(path).unwrap();
+    let file: File = File::create(dst_file).unwrap();
 
     let walkdir = WalkDir::new(src_dir);
     let it = walkdir.into_iter();
